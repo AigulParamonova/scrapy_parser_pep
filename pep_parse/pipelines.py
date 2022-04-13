@@ -9,12 +9,10 @@ class PepParsePipeline:
 
     def open_spider(self, spider):
         self.statuses = {}
-        self.count = 0
 
     def process_item(self, item, spider):
         status = item['status']
         self.statuses[status] = self.statuses.get(status, 0) + 1
-        self.count += 1
         return item
 
     def close_spider(self, spider):
@@ -27,8 +25,7 @@ class PepParsePipeline:
         header = ['Статус', 'Количество']
         with open(archive_path, mode='w', encoding='utf-8') as f:
             writer = csv.writer(f, dialect='unix', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(header)
-            for key, value in self.statuses.items():
-                data = [str(key), str(value)]
-                writer.writerow(data)
-            writer.writerow(['Total', self.count])
+            total = sum(self.statuses.values())
+            writer.writerows([header,
+                             *self.statuses.items(),
+                             ['Total', total]])
